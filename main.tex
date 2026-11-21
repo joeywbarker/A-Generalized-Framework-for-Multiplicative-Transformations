@@ -1,5 +1,8 @@
 \documentclass[12pt]{article}
 \usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta}
 \usepackage{geometry}
 \usepackage{hyperref}
 \geometry{a4paper, margin=1in}
@@ -16,6 +19,7 @@
 \newtheorem{proposition}[theorem]{Proposition}
 \theoremstyle{definition}
 \newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
 \theoremstyle{remark}
 \newtheorem{remark}[theorem]{Remark}
 
@@ -23,33 +27,55 @@
 \newcommand{\C}{\mathbb{C}}
 \newcommand{\sgn}{\operatorname{sgn}}
 \newcommand{\rank}{\operatorname{rank}}
+\newcommand{\norm}[1]{\lVert #1\rVert}
 
 \title{Multiplication as Reflection, Rotation and Scaling:\\
-A Decomposition Framework from the Reals to Matrices}
+A Decomposition Framework\\from the Reals to Matrices}
 \author{Joey Wayne Barker \\ Independent Researcher}
-\date{Preprint, November 2026}
+\date{Preprint, version 1.1, November 2026}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-Multiplication is often taught as repeated addition or as scaling, and neither description covers multiplication by $0$, $1$ or a negative number. We organize multiplication by a fixed factor as a composition of two geometrically distinct parts: a \emph{magnitude} part (expansion, contraction, or annihilation) and an \emph{orientation} part (identity, reflection, or more generally rotation). For real numbers this is the isomorphism $\R^{\times}\cong\{\pm1\}\times(0,\infty)$. We show that the same viewpoint extends to the complex numbers through the polar form, where ``sign reversal'' becomes rotation by $\pi$, and to matrices through the polar decomposition and the singular value decomposition, where the four behaviours (expansion, reduction, orientation change, nullification) correspond to singular values greater than, between $0$ and, and equal to $1$ and $0$, and to the sign of the determinant. None of the underlying mathematics is new; the contribution is a single, consistent classification, stated with complete proofs, that is suitable for teaching and for relating the elementary and advanced cases.
+Multiplication is commonly taught as repeated addition or as scaling, and neither description covers multiplication by $0$, by $1$, or by a negative number. We organize multiplication by a fixed factor as a composition of two geometrically distinct parts: a \emph{magnitude} part (expansion, reduction, or annihilation of length) and an \emph{orientation} part (identity, reflection or, more generally, rotation). For the real numbers this is the group isomorphism $\R^{\times}\cong\{\pm1\}\times(0,\infty)$; we use it to derive the sign rule, the behaviour of inverses and the role of zero from a single classification. We show that the same viewpoint extends without change of idea to the complex numbers, where ``sign reversal'' becomes a rotation by $\pi$, and to real matrices, where the polar decomposition and the singular value decomposition give sharp two-sided length bounds $\sigma_{\min}\norm{x}\le\norm{Ax}\le\sigma_{\max}\norm{x}$ and make the four behaviours directional. We prove that a continuous change from orientation-preserving to orientation-reversing multiplication must pass through nullification in the real and matrix settings, but need not in the complex plane, and that the magnitude/orientation split is forced rather than chosen. All mathematics here is classical; the contribution is a single, consistent, fully proved classification with worked examples, a reproducible numerical check of every example, and explicit, testable hypotheses for teaching. We make no claims beyond what is proved.
 \end{abstract}
 
-\section{Introduction}
-Consider the products $5\times 1=5$, $5\times 0=0$ and $5\times(-1)=-5$. Describing multiplication as repeated addition explains $5\times 3$ but not these three, and describing it as ``scaling'' hides the fact that multiplication by $-1$ does not change size at all: it changes orientation. The distinction between a factor's size and its sign is familiar from the polar form of complex numbers and from the polar decomposition of matrices, but it is rarely presented as one idea that begins with the real line.
+\tableofcontents
+\newpage
 
-This note makes that idea explicit. For a fixed factor $b$, let $m_b$ denote the map $x\mapsto bx$. We ask what $m_b$ does to the space it acts on, and we separate the answer into
+%---------------------------------------------------------------------
+\section{Introduction}\label{sec:intro}
+Consider the products $5\times 1=5$, $5\times 0=0$ and $5\times(-1)=-5$. Describing multiplication as repeated addition explains $5\times 3$ but not these three, and describing it as ``scaling'' hides the fact that multiplication by $-1$ does not change size at all: it changes orientation. The separation of a factor's size from its orientation is familiar from the polar form of complex numbers and from the polar and singular value decompositions of matrices, but it is rarely presented as one idea that starts on the number line and continues, unchanged in spirit, into linear algebra.
+
+\paragraph{Approach.}
+For a fixed factor $b$ let $m_b$ denote the map $x\mapsto bx$. Rather than asking what the \emph{number} $b$ is, we ask what the \emph{map} $m_b$ does to the space it acts on, and we separate the answer into
 \begin{itemize}
-  \item a \textbf{magnitude behaviour}: the map enlarges (\emph{expansion}), shrinks (\emph{reduction}), preserves, or collapses (\emph{nullification}) lengths; and
-  \item an \textbf{orientation behaviour}: the map preserves orientation (\emph{identity} or \emph{rotation}) or reverses it (\emph{reflection}).
+  \item a \textbf{magnitude behaviour}: lengths are enlarged (\emph{expansion}), kept (\emph{isometry}), shrunk (\emph{reduction}), or collapsed (\emph{nullification}); and
+  \item an \textbf{orientation behaviour}: orientation is preserved (\emph{identity}, or \emph{rotation} in higher dimension) or reversed (\emph{reflection}).
 \end{itemize}
-Sections~\ref{sec:real}--\ref{sec:matrix} treat the real numbers, the complex numbers and matrices in turn. Section~\ref{sec:discussion} discusses the limits of the framework and related work on how multiplication is learned.
 
+\paragraph{Contributions.}
+\begin{enumerate}
+  \item A single classification of multiplicative behaviour across $\R$, $\C$ and $\R^{n\times n}$ (Sections~\ref{sec:real}--\ref{sec:matrix}), with complete proofs and a dictionary between the three settings.
+  \item A sharp, elementary length-bound theorem for matrices (Theorem~\ref{thm:bounds}) that reduces to $|bx|=|b||x|$ when $n=1$, and a statement of exactly when scaling and reflection commute (Proposition~\ref{prop:commute}).
+  \item Derivations of three elementary facts (the sign rule, the way inverses behave, why zero has no inverse) from the classification (Proposition~\ref{prop:consequences}).
+  \item A theorem linking orientation change to nullification (Theorem~\ref{thm:orientation}), and a uniqueness statement showing the split is forced (Proposition~\ref{prop:unique}).
+  \item Worked examples, three figures, and a script (\texttt{verify\_claims.py}) that checks every numerical claim in this paper.
+  \item Concrete, testable hypotheses for instruction (Section~\ref{sec:teaching}), clearly marked as hypotheses.
+\end{enumerate}
+
+\paragraph{What is not claimed.}
+Every theorem below is classical or elementary, and we claim no priority for any of them. We do not propose a new algebraic structure: each ``transformation'' is multiplication by a real number in a particular range, and the field axioms already govern their composition. We make no claims about numerical algorithms, hardware or machine learning, and we report no empirical results about learning. An earlier draft of this note (February 2025) proposed four ``operations'' with axioms; those axioms were incorrect for negative operands and are superseded by the present version.
+
+\paragraph{Related work.}
+The limits of repeated addition as a model of multiplication, and the role of multiplicative reasoning and scaling, are well documented in mathematics education research \cite{fischbein1985,vergnaud1983,greer1992,thompson2003}. The geometric reading of the singular value decomposition as rotate--stretch--rotate is standard in linear algebra \cite{horn2013,golub2013}, and the polar decomposition and its computation are treated in depth in \cite{higham1986,horn2013}. The topology of the general linear groups used in Section~\ref{sec:orientation} is classical \cite{hall2015}. The present note differs only in presentation: it follows one idea through all three settings and states its elementary consequences precisely.
+
+%---------------------------------------------------------------------
 \section{The Real Numbers}\label{sec:real}
 
 \begin{definition}
-For $b\in\R$ let $m_b:\R\to\R$, $m_b(x)=bx$. For $x\neq0$, the \emph{magnitude factor} of $m_b$ is $|m_b(x)|/|x|=|b|$, which does not depend on $x$.
+For $b\in\R$ let $m_b:\R\to\R$, $m_b(x)=bx$. For $x\neq0$ the \emph{magnitude factor} of $m_b$ is $|m_b(x)|/|x|=|b|$, which does not depend on $x$.
 \end{definition}
 
 \begin{theorem}[Sign--magnitude decomposition]\label{thm:real}
@@ -64,95 +90,344 @@ m_b=m_{|b|}\circ m_{\sgn(b)}=m_{\sgn(b)}\circ m_{|b|},
 where $m_{|b|}$ is a scaling and $m_{\sgn(b)}$ is the identity (if $\sgn(b)=1$) or the reflection $x\mapsto -x$ (if $\sgn(b)=-1$).
 \end{theorem}
 \begin{proof}
-Uniqueness and existence of the factorization are immediate from the definition of the sign and absolute value. The map is a homomorphism because $\sgn(bc)=\sgn(b)\sgn(c)$ and $|bc|=|b||c|$; it is injective since $(\sgn b,|b|)$ determines $b$, and surjective since $(s,t)\mapsto st$ is a right inverse. The composition identity follows from commutativity of multiplication in $\R$.
+Existence and uniqueness of the factorization follow from the definition of sign and absolute value. The map is a homomorphism because $\sgn(bc)=\sgn(b)\sgn(c)$ and $|bc|=|b||c|$; it is injective since $(\sgn b,|b|)$ determines $b$, and surjective since $(s,t)\mapsto st$ is a right inverse. The composition identities follow from commutativity of multiplication in $\R$.
 \end{proof}
 
 \begin{proposition}[Complete classification of real factors]\label{prop:classification}
-Every $b\in\R$ falls into exactly one magnitude class, and, if $b\ne0$, exactly one orientation class:
+Every $b\in\R$ falls into exactly one magnitude class and, if $b\ne0$, exactly one orientation class:
 \begin{center}
-\begin{tabular}{l|l|l}
-Magnitude class & Condition & Effect on $|x|$\\\hline
-Expansion & $|b|>1$ & $|bx|>|x|$ for $x\neq0$\\
+\begin{tabular}{@{}lll@{}}
+\toprule
+Magnitude class & Condition & Effect on $|x|$ (for $x\ne0$)\\\midrule
+Expansion & $|b|>1$ & $|bx|>|x|$\\
 Isometry & $|b|=1$ & $|bx|=|x|$\\
-Reduction & $0<|b|<1$ & $0<|bx|<|x|$ for $x\neq0$\\
-Nullification & $b=0$ & $bx=0$ for all $x$
+Reduction & $0<|b|<1$ & $0<|bx|<|x|$\\
+Nullification & $b=0$ & $bx=0$\\\bottomrule
 \end{tabular}
 \qquad
-\begin{tabular}{l|l}
-Orientation class & Condition\\\hline
-Orientation-preserving & $b>0$\\
-Orientation-reversing (reflection) & $b<0$
+\begin{tabular}{@{}ll@{}}
+\toprule
+Orientation class & Condition\\\midrule
+Preserving & $b>0$\\
+Reversing (reflection) & $b<0$\\\bottomrule
 \end{tabular}
 \end{center}
 \end{proposition}
 \begin{proof}
-The classes are defined by the trichotomy of $|b|$ against $1$ and $0$ and by the sign of $b$. The stated effects follow from $|bx|=|b||x|$.
+The classes are given by the trichotomy of $|b|$ against $1$ and $0$ and by the sign of $b$; the effects follow from $|bx|=|b||x|$.
+\end{proof}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[x=0.78cm,y=1cm,>=Stealth]
+  \foreach \b/\row/\bd/\lab in {
+      3/0/55/{$b=3$: expansion},
+      0.5/-1.15/-55/{$b=\tfrac12$: reduction},
+      -1/-2.3/-55/{$b=-1$: reflection},
+      -1.5/-3.45/-55/{$b=-\tfrac32$: reflection and expansion},
+      0/-4.6/-55/{$b=0$: nullification}} {
+    \draw[gray] (-4,\row) -- (7,\row);
+    \foreach \t in {-4,-3,...,7} \draw[gray] (\t,\row-0.06) -- (\t,\row+0.06);
+    \fill (2,\row) circle (2.2pt);
+    \pgfmathsetmacro{\img}{2*\b}
+    \fill[blue] (\img,\row) circle (2.2pt);
+    \draw[->,thick,blue] (2,\row) to[bend left=\bd] (\img,\row);
+    \node[anchor=west,font=\small] at (7.25,\row) {\lab};
+  }
+  \foreach \t in {-4,-2,0,2,4,6} \node[font=\scriptsize,gray,below] at (\t,-4.7) {$\t$};
+\end{tikzpicture}
+\caption{Where the point $2$ (black) goes under $m_b$ (blue). Expansion and reduction move the point along the line; a negative factor carries it across $0$; nullification sends it to $0$.}
+\label{fig:numberline}
+\end{figure}
+
+\begin{example}[Seven factors]\label{ex:seven}
+The table lists seven factors with their sign, magnitude, classes and the image of the point $2$.
+\begin{center}
+\begin{tabular}{@{}rcccccc@{}}
+\toprule
+$b$ & $\sgn b$ & $|b|$ & Magnitude class & Orientation & $2b$\\\midrule
+$3$ & $+$ & $3$ & expansion & preserving & $6$\\
+$\tfrac12$ & $+$ & $\tfrac12$ & reduction & preserving & $1$\\
+$1$ & $+$ & $1$ & isometry (identity) & preserving & $2$\\
+$-1$ & $-$ & $1$ & isometry & reversing & $-2$\\
+$-3$ & $-$ & $3$ & expansion & reversing & $-6$\\
+$-\tfrac12$ & $-$ & $\tfrac12$ & reduction & reversing & $-1$\\
+$0$ & --- & $0$ & nullification & --- & $0$\\\bottomrule
+\end{tabular}
+\end{center}
+The factor $-3$, for instance, is neither ``a bigger'' nor ``a flip'' but both at once, in either order. The factor $1$ is the identity: an isometry that preserves orientation, not a degenerate scaling.
+\end{example}
+
+\begin{proposition}[Elementary consequences]\label{prop:consequences}
+\begin{enumerate}
+\item[\textup{(a)}] \textbf{Sign rule.} $m_{-1}\circ m_{-1}=\mathrm{id}$, and for nonzero $a,b$ the sign of $ab$ is $\sgn(a)\sgn(b)$. In particular a product of two negative numbers is positive: two reflections compose to the identity.
+\item[\textup{(b)}] \textbf{Inverses.} $m_b$ is invertible if and only if $b\ne0$, with inverse $m_{1/b}$. Inversion exchanges expansion and reduction, fixes the isometry class, and preserves the orientation class.
+\item[\textup{(c)}] \textbf{Zero.} $m_0$ sends every $x$ to $0$, so the result $0$ does not determine $x$: no map $g$ satisfies $g\circ m_0=\mathrm{id}$. Thus there is no ``undoing'' of multiplication by zero.
+\item[\textup{(d)}] \textbf{When does multiplying increase a number?} For real $x$ and $b$, $bx>x$ if and only if ($b>1$ and $x>0$) or ($b<1$ and $x<0$). The magnitude statement ``$|bx|>|x|$ iff $|b|>1$'' is the correct general form.
+\end{enumerate}
+\end{proposition}
+\begin{proof}
+(a) $m_{-1}(m_{-1}(x))=(-1)(-1)x=x$, and the sign statement is the homomorphism property of Theorem~\ref{thm:real}. (b) If $b\ne0$ then $m_{1/b}$ is a two-sided inverse; $|1/b|>1$ iff $|b|<1$, $|1/b|=1$ iff $|b|=1$, and $\sgn(1/b)=\sgn(b)$. If $b=0$ then $m_0$ is not injective, so it has no inverse. (c) If $g\circ m_0=\mathrm{id}$ then $g(0)=g(m_0(1))=1$ and $g(0)=g(m_0(2))=2$, a contradiction. (d) $bx-x=(b-1)x>0$ iff $b-1$ and $x$ have the same strict sign.
 \end{proof}
 
 \begin{remark}
-The classification is of the \emph{map} $m_b$, not of $b$ alone, and it is a two-coordinate classification. For example, $-3$ is an expansion composed with a reflection, and $-\tfrac12$ is a reduction composed with a reflection. The case $b=1$ is the identity: an isometry that preserves orientation. Nullification is the unique non-invertible case; $m_0$ projects $\R$ onto $\{0\}$ and is the only $m_b$ that loses information. These are statements about $|bx|$, not about $bx$ itself: for $x<0$ and $b>1$ one has $bx<x$ even though $|bx|>|x|$, so ``multiplication by $b>1$ increases $x$'' is true only for $x>0$.
+Part (d) isolates exactly where the slogan ``multiplication makes bigger'' is true as a statement about the number itself, and where it is only true about its magnitude. For example $2\cdot(-5)=-10<-5$ although $|{-10}|>|{-5}|$.
 \end{remark}
 
+%---------------------------------------------------------------------
 \section{The Complex Numbers}\label{sec:complex}
 Write a nonzero $b\in\C$ in polar form $b=re^{i\theta}$ with $r=|b|>0$ and $\theta\in\R/2\pi\mathbb{Z}$.
 
 \begin{theorem}[Polar decomposition in $\C$]\label{thm:complex}
-The map $b\mapsto(e^{i\theta},|b|)$ is a group isomorphism $\C^{\times}\cong S^1\times(0,\infty)$, and $m_b$ is the composition of the scaling by $|b|$ and the rotation of the plane by $\theta=\arg b$, which commute. Multiplication by a real number is the special case $\theta\in\{0,\pi\}$; in particular, \emph{reflection of the real line is rotation of the plane by $\pi$.}
+The map $b\mapsto(e^{i\theta},|b|)$ is a group isomorphism $\C^{\times}\cong S^1\times(0,\infty)$, and $m_b$ is the composition of the scaling by $|b|$ and the rotation of the plane by $\theta=\arg b$; these commute. Multiplication by a real number is the special case $\theta\in\{0,\pi\}$.
 \end{theorem}
 \begin{proof}
-For $b=re^{i\theta}$ and $c=se^{i\phi}$ we have $bc=rs\,e^{i(\theta+\phi)}$, so the polar coordinates multiply in $(0,\infty)$ and add in $S^1$, giving a homomorphism that is bijective by existence and uniqueness of polar form. Identifying $\C$ with $\R^2$, multiplication by $e^{i\theta}$ is the rotation matrix $\begin{pmatrix}\cos\theta&-\sin\theta\\ \sin\theta&\cos\theta\end{pmatrix}$ and multiplication by $r$ is $rI$, which commute.
+For $b=re^{i\theta}$ and $c=se^{i\phi}$ we have $bc=rs\,e^{i(\theta+\phi)}$, so polar coordinates multiply in $(0,\infty)$ and add in $S^1$, giving a homomorphism that is bijective by existence and uniqueness of polar form. Identifying $\C$ with $\R^2$, multiplication by $e^{i\theta}$ is the rotation matrix $\begin{pmatrix}\cos\theta&-\sin\theta\\ \sin\theta&\cos\theta\end{pmatrix}$ and multiplication by $r$ is $rI$; these commute.
 \end{proof}
 
-This changes the interpretation of ``sign reversal'': on the real line the only orientation behaviours available are $\theta=0$ and $\theta=\pi$, and the plane reveals them as the two real members of the circle of rotations. Multiplication by $i$ is neither expansion, reduction nor reflection of the line; it is a quarter turn, and has no real analogue.
+\begin{figure}[h]
+\centering
+\begin{minipage}{0.48\textwidth}
+\centering
+\begin{tikzpicture}[scale=2.1,>=Stealth]
+  \draw[gray,->] (-0.35,0) -- (1.75,0) node[right,font=\scriptsize] {Re};
+  \draw[gray,->] (0,-0.35) -- (0,1.55) node[above,font=\scriptsize] {Im};
+  \draw[gray,dashed] (0,0) circle (1);
+  \draw[gray,dotted] (0,0) circle (1.4142);
+  \draw[thick,blue,->] (0,0) -- (1,1);
+  \fill (1,0) circle (1pt) node[below,font=\scriptsize] {$1$};
+  \fill[blue] (1,1) circle (1pt) node[above right,font=\scriptsize] {$1+i$};
+  \draw[red,->] (1,0) arc[start angle=0,end angle=45,radius=1];
+  \draw[red,->] (0.7071,0.7071) -- (1,1);
+  \draw (0.45,0) arc[start angle=0,end angle=45,radius=0.45];
+  \node[font=\scriptsize] at (0.62,0.17) {$\tfrac\pi4$};
+\end{tikzpicture}
 
+\small (a) $b=1+i$: rotate by $\pi/4$ (red arc), then scale by $\sqrt2$ (red segment).
+\end{minipage}
+\hfill
+\begin{minipage}{0.48\textwidth}
+\centering
+\begin{tikzpicture}[scale=0.95,>=Stealth]
+  \draw[gray,->] (-2.6,0) -- (2.6,0) node[right,font=\scriptsize] {Re};
+  \draw[gray,->] (0,-0.3) -- (0,2.5) node[above,font=\scriptsize] {Im};
+  \draw[gray,dashed] (0,0) circle (1);
+  \fill (1,0) circle (1.4pt) node[below,font=\scriptsize] {$1$};
+  \fill[blue] (-2,0) circle (1.6pt) node[below,font=\scriptsize] {$-2$};
+  \draw[red,->] (1,0) -- (2,0);
+  \draw[red,->] (2,0) arc[start angle=0,end angle=180,radius=2];
+  \node[font=\scriptsize,red,fill=white,inner sep=1pt] at (0,2.3) {rotation by $\pi$};
+\end{tikzpicture}
+
+\small (b) $b=-2$: scale by $2$, then rotate by $\pi$.
+\end{minipage}
+\caption{Multiplication by $b$ as scaling and rotation of the plane. A negative real is a half-turn.}
+\label{fig:complex}
+\end{figure}
+
+\begin{example}\label{ex:complex}
+$b=1+i$ has $|b|=\sqrt2$ and $\arg b=\pi/4$. $b=-2$ has $|b|=2$ and $\arg b=\pi$. $b=i$ has $|b|=1$ and $\arg b=\pi/2$: an isometry that is a quarter turn, with no real analogue.
+\end{example}
+
+\begin{remark}[What ``reversal'' becomes]
+On the line the only orientation behaviours available are $\theta=0$ and $\theta=\pi$. In the plane they are the two real members of the circle of rotations. The map $x\mapsto -x$ on $\R$ is the \emph{restriction} to the real axis of the half-turn of $\C$; it is a reflection of the line but a rotation of the plane. This is the first appearance of a theme developed in Section~\ref{sec:orientation}: whether a transformation counts as ``reversing'' depends on the dimension in which it is viewed.
+\end{remark}
+
+%---------------------------------------------------------------------
 \section{Matrices}\label{sec:matrix}
-Let $A\in\R^{n\times n}$ and consider $m_A:x\mapsto Ax$ on $\R^n$. Two standard factorizations (see \cite{horn2013}) give the analogue of Theorems~\ref{thm:real} and~\ref{thm:complex}.
+Let $A\in\R^{n\times n}$ and consider $m_A:x\mapsto Ax$ on $\R^n$ with the Euclidean norm. Two standard factorizations \cite{horn2013,golub2013} give the analogue of Theorems~\ref{thm:real} and~\ref{thm:complex}.
 
 \begin{theorem}[Polar decomposition]\label{thm:polar}
-Every $A\in\R^{n\times n}$ can be written $A=UP$ with $U$ orthogonal and $P=(A^TA)^{1/2}$ symmetric positive semidefinite. $P$ is unique; $U$ is unique if $A$ is invertible. Moreover $UP=PU$ if and only if $A$ is normal ($A^TA=AA^T$).
+Every $A\in\R^{n\times n}$ can be written $A=UP$ with $U$ orthogonal and $P=(A^TA)^{1/2}$ symmetric positive semidefinite. $P$ is unique, and $U$ is unique if $A$ is invertible.
 \end{theorem}
 
 \begin{theorem}[Singular value decomposition]\label{thm:svd}
 $A=V\Sigma W^T$ with $V,W$ orthogonal and $\Sigma=\operatorname{diag}(\sigma_1\ge\cdots\ge\sigma_n\ge0)$. The $\sigma_i$ are the eigenvalues of $P$, and $\rank A=\#\{i:\sigma_i>0\}$.
 \end{theorem}
 
-Both theorems are standard \cite{horn2013}. Reading them with the classification of Section~\ref{sec:real} gives the following dictionary.
+Both are standard \cite{horn2013}; see \cite{higham1986} for computation. The new ingredient for our purposes is that the singular values give exact length bounds, which generalize $|bx|=|b||x|$.
+
+\begin{theorem}[Length bounds]\label{thm:bounds}
+For all $x\in\R^n$,
+\[
+\sigma_n\norm{x}\;\le\;\norm{Ax}\;\le\;\sigma_1\norm{x},
+\]
+and both bounds are attained: by $x=w_1$ and $x=w_n$, the first and last columns of $W$.
+\end{theorem}
+\begin{proof}
+Since $V$ is orthogonal, $\norm{Ax}=\norm{\Sigma W^Tx}$. Put $y=W^Tx$, so $\norm{y}=\norm{x}$. Then $\norm{\Sigma y}^2=\sum_i\sigma_i^2y_i^2$ lies between $\sigma_n^2\norm{y}^2$ and $\sigma_1^2\norm{y}^2$. Taking $y=e_1$ or $y=e_n$ gives equality.
+\end{proof}
+
+\noindent For $n=1$ this is $|bx|=|b||x|$. In general it shows that the four magnitude behaviours must be read \emph{direction by direction}:
 
 \begin{center}
-\begin{tabular}{p{0.34\textwidth}|p{0.58\textwidth}}
-Real case & Matrix case\\\hline
-Scaling by $|b|>1$ (expansion) & singular values $\sigma_i>1$ stretch directions\\
-Scaling by $0<|b|<1$ (reduction) & singular values $0<\sigma_i<1$ shrink directions\\
-Isometry, $|b|=1$ & $\sigma_i=1$\\
-Nullification, $b=0$ & $\sigma_i=0$: directions are collapsed, $\rank A$ drops\\
-Orientation-preserving, $b>0$ & invertible $A$ with $\det U=+1$ (equivalently $\det A>0$)\\
-Reflection, $b<0$ & invertible $A$ with $\det U=-1$ (equivalently $\det A<0$)
+\begin{tabular}{@{}p{0.34\textwidth}p{0.58\textwidth}@{}}
+\toprule
+Real case & Matrix case\\\midrule
+Expansion, $|b|>1$ & singular values $\sigma_i>1$: those directions are stretched\\
+Isometry, $|b|=1$ & $\sigma_i=1$: lengths along those directions are kept\\
+Reduction, $0<|b|<1$ & $0<\sigma_i<1$: those directions are shrunk\\
+Nullification, $b=0$ & $\sigma_i=0$: those directions are collapsed and $\rank A$ drops\\
+Orientation preserving, $b>0$ & invertible $A$ with $\det U=+1$, equivalently $\det A>0$\\
+Orientation reversing, $b<0$ & invertible $A$ with $\det U=-1$, equivalently $\det A<0$\\\bottomrule
 \end{tabular}
 \end{center}
+Here $\det A=\det U\cdot\prod_i\sigma_i$, so $\sgn\det A=\det U$ and $|\det A|=\prod_i\sigma_i$ is the factor by which volume changes. Net volume change can hide directional behaviour (Example~\ref{ex:shear}).
 
-\noindent Two differences from the scalar case matter.
-\begin{enumerate}
-\item \textbf{Behaviour is directional.} A matrix may expand one direction, reduce another and annihilate a third. The scalar classes of Proposition~\ref{prop:classification} apply direction by direction through the singular values, not to $A$ as a whole.
-\item \textbf{The factors need not commute.} For a scalar, scaling and reflection commute. In Theorem~\ref{thm:polar} they commute exactly when $A$ is normal. This is the first place where the elementary picture ``scale then flip, in either order'' genuinely fails.
-\end{enumerate}
+\begin{proposition}[Invertibility]\label{prop:invertible}
+$m_A$ is invertible iff $\sigma_n>0$ iff $\det A\ne0$. The dimension of the collapsed subspace $\ker A$ is the number of zero singular values.
+\end{proposition}
+\begin{proof}
+$A=V\Sigma W^T$ is invertible iff $\Sigma$ is, iff every $\sigma_i>0$. Also $\ker A=W\ker\Sigma$ has dimension $\#\{i:\sigma_i=0\}$, and $|\det A|=\prod\sigma_i$.
+\end{proof}
+
+\begin{proposition}[When scaling and reflection commute]\label{prop:commute}
+For $A=UP$ as in Theorem~\ref{thm:polar}, $UP=PU$ if and only if $A$ is normal ($A^TA=AA^T$).
+\end{proposition}
+\begin{proof}
+We have $A^TA=P^2$ and $AA^T=UP^2U^T$. If $UP=PU$, then $UP^2U^T=P^2$, so $A$ is normal. Conversely, if $A$ is normal then $UP^2U^T=P^2$, so $U$ commutes with $P^2$. The positive semidefinite square root $P$ of $P^2$ is a polynomial in $P^2$ (interpolate $t\mapsto\sqrt t$ on the spectrum), so $U$ commutes with $P$.
+\end{proof}
+For scalars every $1\times1$ matrix is normal, which is why ``scale then flip'' and ``flip then scale'' agree on the line. For matrices they generally do not.
+
+\begin{example}[A shear: expansion and reduction together]\label{ex:shear}
+Let $A=\begin{pmatrix}1&1\\0&1\end{pmatrix}$. Then $A^TA=\begin{pmatrix}1&1\\1&2\end{pmatrix}$ has eigenvalues $\varphi^2$ and $\varphi^{-2}$, where $\varphi=\tfrac{1+\sqrt5}{2}$, so $\sigma_1=\varphi\approx1.618$ and $\sigma_2=\varphi^{-1}\approx0.618$. One direction is expanded, another reduced, and $\det A=1$, so area is preserved: net volume change reports ``no change'' although both behaviours are present. Exactly,
+\[
+P=\frac1{\sqrt5}\begin{pmatrix}2&1\\1&3\end{pmatrix},\qquad
+U=\frac1{\sqrt5}\begin{pmatrix}2&1\\-1&2\end{pmatrix},\qquad UP=A,
+\]
+and $U$ is a rotation by $-\arctan\tfrac12\approx-26.57^\circ$ ($\det U=+1$). Since $A$ is not normal, $PU=\tfrac15\begin{pmatrix}3&4\\-1&7\end{pmatrix}\neq A$: here the order of ``scale'' and ``rotate'' matters. Figure~\ref{fig:ellipse} shows the image of the unit circle.
+\end{example}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[scale=1.9,>=Stealth]
+  \draw[gray,->] (-1.85,0) -- (1.95,0) node[right,font=\scriptsize] {$x$};
+  \draw[gray,->] (0,-1.15) -- (0,1.45) node[above,font=\scriptsize] {$y$};
+  \draw[gray,dashed] (0,0) circle (1);
+  \draw[thick,blue,rotate=31.717] (0,0) ellipse (1.618 and 0.618);
+  \draw[red,->,rotate=31.717] (0,0) -- (1.618,0);
+  \node[red,font=\scriptsize,anchor=west,fill=white,inner sep=1pt] at (1.42,0.78) {$\sigma_1=\varphi$};
+  \draw[red,->,rotate=31.717] (0,0) -- (0,0.618);
+  \node[red,font=\scriptsize,anchor=east,fill=white,inner sep=1pt] at (-0.36,0.62) {$\sigma_2=\varphi^{-1}$};
+  \fill (1,0) circle (0.9pt) node[below right,font=\scriptsize] {$e_1\mapsto(1,0)$};
+  \fill (0,1) circle (0.9pt) node[above left,font=\scriptsize] {$e_2$};
+  \fill[blue] (1,1) circle (0.9pt) node[above right,font=\scriptsize] {$Ae_2=(1,1)$};
+\end{tikzpicture}
+\caption{The shear $A=\bigl(\begin{smallmatrix}1&1\\0&1\end{smallmatrix}\bigr)$ maps the unit circle (dashed) to an ellipse (blue) whose semi-axes are the singular values (red), with major axis at $\arctan(1/\varphi)\approx31.72^\circ$. One direction is expanded, another reduced; area is unchanged.}
+\label{fig:ellipse}
+\end{figure}
+
+\begin{example}[Nullification, reflection, and isometry]\label{ex:others}
+Three further matrices illustrate the remaining behaviours.
+\begin{itemize}
+\item $B=\begin{pmatrix}1&1\\1&1\end{pmatrix}$ has singular values $2$ and $0$. It stretches the direction $(1,1)$ by $2$ and collapses $(1,-1)$ to $0$; $\rank B=1$ and $B$ has no inverse.
+\item $C=\operatorname{diag}(3,-\tfrac12)$ has $U=\operatorname{diag}(1,-1)$ and $P=\operatorname{diag}(3,\tfrac12)$, so $\det U=-1$. It expands the first coordinate, and reduces and reflects the second. Since $C$ is normal, $UP=PU$.
+\item The swap $\bigl(\begin{smallmatrix}0&1\\1&0\end{smallmatrix}\bigr)$ has $\sigma_1=\sigma_2=1$ and $\det=-1$: a pure reflection, with no expansion or reduction in any direction.
+\end{itemize}
+\end{example}
 
 \begin{remark}
-In the sense of Theorem~\ref{thm:polar}, the $1\times1$ real matrices recover Theorem~\ref{thm:real} ($U=\pm1$, $P=|b|$) and the $2\times2$ matrices of the form $\begin{pmatrix}a&-b\\b&a\end{pmatrix}$ recover Theorem~\ref{thm:complex}.
+The $1\times1$ real matrices recover Theorem~\ref{thm:real} ($U=\pm1$, $P=|b|$), and the $2\times2$ matrices $\bigl(\begin{smallmatrix}x&-y\\y&x\end{smallmatrix}\bigr)$ recover Theorem~\ref{thm:complex}: with $z=x+iy$, $P=|z|I$ and $U$ is the rotation by $\arg z$. Rectangular and complex matrices are handled in the same way by the SVD (with unitary factors in the complex case).
 \end{remark}
 
-\section{Discussion}\label{sec:discussion}
-\subsection{What is and is not claimed}
-The decompositions above are classical. The aim here is to present them as one progression, from $\R$ to $\C$ to matrices, organized around the same four magnitude behaviours and the orientation behaviour. We do not claim a new algebraic structure: each of the ``transformations'' is multiplication by a real number in a particular range, and the usual field axioms already govern their composition. We also make no claims about numerical algorithms, hardware or machine learning; whether the viewpoint offers any benefit there would need separate, evidence-based work.
+%---------------------------------------------------------------------
+\section{Orientation Change and Nullification}\label{sec:orientation}
+The classification can be tied together by one question: can a transformation that preserves orientation be deformed \emph{continuously} into one that reverses it?
 
-\subsection{Relation to the study of multiplicative reasoning}
-That repeated addition and scaling fail as complete models of multiplication is well documented in mathematics education research: Fischbein et al.\ \cite{fischbein1985} showed that the implicit ``repeated addition'' model constrains how students handle multipliers below $1$, and Vergnaud \cite{vergnaud1983} treats multiplicative structures as a conceptual field distinct from additive ones. The classification here could be used as a content map for instruction (separating size from orientation, and treating $0$ and $1$ as their own cases), but whether it improves learning is an empirical question this note does not address.
+\begin{theorem}\label{thm:orientation}
+\begin{enumerate}
+\item[\textup{(a)}] \emph{(Real line.)} Any continuous path $b(t)$, $t\in[0,1]$, in $\R$ with $b(0)>0$ and $b(1)<0$ has $b(t_0)=0$ for some $t_0$: it passes through nullification.
+\item[\textup{(b)}] \emph{(Matrices.)} Any continuous path $A(t)$ in $\R^{n\times n}$ with $\det A(0)>0$ and $\det A(1)<0$ passes through a singular matrix: some direction is collapsed.
+\item[\textup{(c)}] \emph{(Complex plane.)} The path $b(t)=e^{i\pi t}$ joins $1$ to $-1$ through nonzero numbers, all of magnitude $1$.
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+(a) is the intermediate value theorem. (b) The function $t\mapsto\det A(t)$ is continuous and changes sign, so it vanishes at some $t_0$, and $A(t_0)$ is singular by Proposition~\ref{prop:invertible}. (c) $|e^{i\pi t}|=1$ and $e^{i\pi\cdot0}=1$, $e^{i\pi\cdot1}=-1$.
+\end{proof}
+
+\noindent Two classical facts \cite{hall2015} complete the picture: $GL_n(\R)$ has exactly two connected components, $\{\det>0\}$ and $\{\det<0\}$, and $GL_n(\C)$ is connected. So (b) is sharp: orientation can be changed only through nullification, and in the complex setting there is nothing to change.
+
+\begin{remark}[Dimension changes the nature of $-1$]\label{rem:dimension}
+On the line, $x\mapsto -x$ is a reflection with ``determinant'' $-1$ and, by (a), cannot be reached from the identity without passing through $0$. In the plane, $-I=\bigl(\begin{smallmatrix}-1&0\\0&-1\end{smallmatrix}\bigr)$ is a rotation by $\pi$ with $\det=+1$, reached from $I$ through the rotations by angle $\pi t$, $t\in[0,1]$, all of which are invertible. Informally: to turn a number around you must either collapse it or give it a second dimension to turn in. This is an interpretation of the theorem, not an additional claim.
+\end{remark}
+
+%---------------------------------------------------------------------
+\section{Why This Decomposition: Uniqueness}\label{sec:unique}
+One may ask whether splitting ``magnitude'' from ``orientation'' is a convenient choice or a forced one.
+
+\begin{proposition}\label{prop:unique}
+Let $A\in\R^{n\times n}$. If $A=QS$ with $Q$ orthogonal and $S$ symmetric positive semidefinite, then $S=(A^TA)^{1/2}$; if $A$ is invertible then also $Q=AS^{-1}$ is determined. In dimension $n=1$ the only orthogonal maps are $q=\pm1$, so the orientation part of a nonzero real $b$ is exactly $\sgn(b)$ and the magnitude part is exactly $|b|$.
+\end{proposition}
+\begin{proof}
+$A^TA=SQ^TQS=S^2$, and a positive semidefinite matrix has a unique positive semidefinite square root \cite{horn2013}. If $A$ is invertible, so is $S$, and $Q=AS^{-1}$. For $n=1$, orthogonality means $|q|=1$.
+\end{proof}
+Thus any way of writing a linear map as a length-preserving part followed by a stretching part, in the order $A=QS$, yields the same stretching part. (In the other order, $A=S'Q'$, one gets $S'=(AA^T)^{1/2}$, which equals $S$ exactly when $A$ is normal, in line with Proposition~\ref{prop:commute}.) In this precise sense, the four magnitude behaviours and the two orientation behaviours are not an arbitrary taxonomy.
+
+%---------------------------------------------------------------------
+\section{Implications for Teaching: Hypotheses, Not Findings}\label{sec:teaching}
+This section is deliberately separated from the mathematics. Nothing here has been tested; it states what the framework suggests and how that could be checked.
+
+\subsection{What the framework offers}
+\begin{itemize}
+\item A vocabulary that separates \emph{how much} (magnitude) from \emph{which way} (orientation), with $0$ and $1$ as named special cases rather than exceptions.
+\item Explanations, not rules, for three standard facts: why a negative times a negative is positive (two flips undo each other, Proposition~\ref{prop:consequences}(a)); why dividing by a number undoes multiplying by it (inverses, (b)); and why zero cannot be divided by or undone ((c)).
+\item A precise reason that ``multiplying makes bigger'' fails: it is true of magnitudes for $|b|>1$, and of numbers only in the cases of Proposition~\ref{prop:consequences}(d).
+\item A continuous bridge to later topics: multiplication by complex numbers as rotation and scaling, and matrices as direction-dependent stretching via the SVD.
+\end{itemize}
+
+\subsection{A proposed progression}
+\begin{enumerate}
+\item Positive factors as stretching or shrinking the number line; $b=1$ as ``nothing happens''.
+\item Zero as collapse of the whole line to a point; the result does not say what was there.
+\item Negative factors as a flip combined with stretching or shrinking; the sign rule from two flips.
+\item Inverses: expansion and reduction undo each other; a flip undoes itself; collapse cannot be undone.
+\item In the plane: a flip is a half-turn, and multiplication by $i$ is a quarter-turn.
+\item Later: matrices act by direction-dependent stretching composed with a rotation or reflection.
+\end{enumerate}
+Representing multiplication through scaling of quantities and number lines is already established in the research literature \cite{thompson2003}; the present proposal is complementary, adding the explicit orientation part and the continuation to $\C$ and matrices.
+
+\subsection{Testable hypotheses}
+\begin{description}
+\item[H1] Learners taught with the magnitude/orientation separation will less often endorse the claim ``multiplying a number by another always makes it larger'' across negative and fractional factors, compared with a standard sequence.
+\item[H2] They will give more correct justifications for the sign rule and for the undefinedness of division by zero.
+\item[H3] They will perform better on a later task asking for the geometric effect of multiplying by a complex number.
+\end{description}
+A suitable design is a pre/post comparison with a control group using validated items, with attention to differences in instruction time. Possible harms should be examined as well, for example extra cognitive load from the additional vocabulary. These hypotheses are conjectures; the literature \cite{fischbein1985,greer1992} documents learners' implicit models of multiplication and the difficulties they can cause, but does not test this framework.
+
+%---------------------------------------------------------------------
+\section{Scope, Limitations and Open Questions}\label{sec:scope}
+\subsection{Limitations}
+\begin{itemize}
+\item The theorems are classical; the contribution is organizational and expository.
+\item A matrix generally has no single magnitude class: expansion, reduction and nullification can coexist (Examples~\ref{ex:shear}, \ref{ex:others}). The classification is exact per direction, not per matrix.
+\item The orientation part of a non-normal matrix does not commute with its magnitude part (Proposition~\ref{prop:commute}), so the ``either order'' picture from the line does not survive.
+\item The results are for finite-dimensional real (and complex) spaces. We do not treat infinite-dimensional operators.
+\item The teaching hypotheses are untested.
+\end{itemize}
 
 \subsection{Open questions}
 \begin{itemize}
-\item The same split holds for the quaternions, $\mathbb{H}^{\times}\cong S^3\times(0,\infty)$, where the orientation part is a unit quaternion (a rotation of $\R^3$ up to sign) and the factors commute only because positive scalars are central. Which parts of the classification survive for other normed division algebras or for rings with zero divisors, where nullification can occur for nonzero factors?
-\item For matrices, can the failure of $UP=PU$ for non-normal $A$ be quantified in a way that is pedagogically useful (for example, by the commutator norm $\|UP-PU\|$)?
-\item Does an instructional sequence built on Sections~\ref{sec:real}--\ref{sec:matrix} produce measurable differences in student understanding relative to the standard sequence?
+\item Can the failure of commutation, for example $\norm{UP-PU}$, be quantified in a way that is pedagogically meaningful?
+\item The split holds for the quaternions, $\mathbb{H}^{\times}\cong S^3\times(0,\infty)$, where the orientation part is a unit quaternion. Which parts of the classification survive for other division algebras, or for rings with zero divisors, where nullification can occur for nonzero factors?
+\item Do the hypotheses H1--H3 hold in a controlled classroom study?
 \end{itemize}
+
+%---------------------------------------------------------------------
+\appendix
+\section{Reproducibility}
+The script \texttt{verify\_claims.py} in the accompanying repository checks, with \texttt{numpy}, every numerical statement above: the sign--magnitude identities, the complex examples, the polar and SVD identities on random matrices, Theorem~\ref{thm:bounds} including attainment, Proposition~\ref{prop:commute} on normal and non-normal matrices, all the matrices in Examples~\ref{ex:shear} and~\ref{ex:others}, the path statements of Theorem~\ref{thm:orientation}, and the failure of the two original axioms for negative operands. It exits with a non-zero status if any check fails.
+
+\section{Quick reference}
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Setting & Magnitude part & Orientation part\\\midrule
+$\R^{\times}$ & $|b|\in(0,\infty)$ & $\sgn b\in\{\pm1\}$ (identity or reflection)\\
+$\C^{\times}$ & $|b|\in(0,\infty)$ & $e^{i\arg b}\in S^1$ (rotation)\\
+$GL_n(\R)$ & $P=(A^TA)^{1/2}$, eigenvalues $\sigma_i$ & $U\in O(n)$, $\det U=\pm1$\\
+Singular $A$ & some $\sigma_i=0$: nullification & $U$ not unique\\\bottomrule
+\end{tabular}
+\end{center}
 
 \bibliographystyle{plain}
 \bibliography{references}
