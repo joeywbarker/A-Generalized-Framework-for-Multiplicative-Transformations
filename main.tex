@@ -1,0 +1,160 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{geometry}
+\usepackage{hyperref}
+\geometry{a4paper, margin=1in}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue,
+  citecolor=blue,
+  pdftitle={Multiplication as Reflection, Rotation and Scaling: A Decomposition Framework from the Reals to Matrices},
+  pdfauthor={Joey Wayne Barker}
+}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\sgn}{\operatorname{sgn}}
+\newcommand{\rank}{\operatorname{rank}}
+
+\title{Multiplication as Reflection, Rotation and Scaling:\\
+A Decomposition Framework from the Reals to Matrices}
+\author{Joey Wayne Barker \\ Independent Researcher}
+\date{Preprint, November 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Multiplication is often taught as repeated addition or as scaling, and neither description covers multiplication by $0$, $1$ or a negative number. We organize multiplication by a fixed factor as a composition of two geometrically distinct parts: a \emph{magnitude} part (expansion, contraction, or annihilation) and an \emph{orientation} part (identity, reflection, or more generally rotation). For real numbers this is the isomorphism $\R^{\times}\cong\{\pm1\}\times(0,\infty)$. We show that the same viewpoint extends to the complex numbers through the polar form, where ``sign reversal'' becomes rotation by $\pi$, and to matrices through the polar decomposition and the singular value decomposition, where the four behaviours (expansion, reduction, orientation change, nullification) correspond to singular values greater than, between $0$ and, and equal to $1$ and $0$, and to the sign of the determinant. None of the underlying mathematics is new; the contribution is a single, consistent classification, stated with complete proofs, that is suitable for teaching and for relating the elementary and advanced cases.
+\end{abstract}
+
+\section{Introduction}
+Consider the products $5\times 1=5$, $5\times 0=0$ and $5\times(-1)=-5$. Describing multiplication as repeated addition explains $5\times 3$ but not these three, and describing it as ``scaling'' hides the fact that multiplication by $-1$ does not change size at all: it changes orientation. The distinction between a factor's size and its sign is familiar from the polar form of complex numbers and from the polar decomposition of matrices, but it is rarely presented as one idea that begins with the real line.
+
+This note makes that idea explicit. For a fixed factor $b$, let $m_b$ denote the map $x\mapsto bx$. We ask what $m_b$ does to the space it acts on, and we separate the answer into
+\begin{itemize}
+  \item a \textbf{magnitude behaviour}: the map enlarges (\emph{expansion}), shrinks (\emph{reduction}), preserves, or collapses (\emph{nullification}) lengths; and
+  \item an \textbf{orientation behaviour}: the map preserves orientation (\emph{identity} or \emph{rotation}) or reverses it (\emph{reflection}).
+\end{itemize}
+Sections~\ref{sec:real}--\ref{sec:matrix} treat the real numbers, the complex numbers and matrices in turn. Section~\ref{sec:discussion} discusses the limits of the framework and related work on how multiplication is learned.
+
+\section{The Real Numbers}\label{sec:real}
+
+\begin{definition}
+For $b\in\R$ let $m_b:\R\to\R$, $m_b(x)=bx$. For $x\neq0$, the \emph{magnitude factor} of $m_b$ is $|m_b(x)|/|x|=|b|$, which does not depend on $x$.
+\end{definition}
+
+\begin{theorem}[Sign--magnitude decomposition]\label{thm:real}
+Every nonzero real $b$ factors uniquely as $b=\sgn(b)\,|b|$ with $\sgn(b)\in\{\pm1\}$ and $|b|\in(0,\infty)$, and the map
+\[
+\R^{\times}\to\{\pm1\}\times(0,\infty),\qquad b\mapsto(\sgn(b),|b|)
+\]
+is a group isomorphism. Consequently, for $b\neq0$,
+\[
+m_b=m_{|b|}\circ m_{\sgn(b)}=m_{\sgn(b)}\circ m_{|b|},
+\]
+where $m_{|b|}$ is a scaling and $m_{\sgn(b)}$ is the identity (if $\sgn(b)=1$) or the reflection $x\mapsto -x$ (if $\sgn(b)=-1$).
+\end{theorem}
+\begin{proof}
+Uniqueness and existence of the factorization are immediate from the definition of the sign and absolute value. The map is a homomorphism because $\sgn(bc)=\sgn(b)\sgn(c)$ and $|bc|=|b||c|$; it is injective since $(\sgn b,|b|)$ determines $b$, and surjective since $(s,t)\mapsto st$ is a right inverse. The composition identity follows from commutativity of multiplication in $\R$.
+\end{proof}
+
+\begin{proposition}[Complete classification of real factors]\label{prop:classification}
+Every $b\in\R$ falls into exactly one magnitude class, and, if $b\ne0$, exactly one orientation class:
+\begin{center}
+\begin{tabular}{l|l|l}
+Magnitude class & Condition & Effect on $|x|$\\\hline
+Expansion & $|b|>1$ & $|bx|>|x|$ for $x\neq0$\\
+Isometry & $|b|=1$ & $|bx|=|x|$\\
+Reduction & $0<|b|<1$ & $0<|bx|<|x|$ for $x\neq0$\\
+Nullification & $b=0$ & $bx=0$ for all $x$
+\end{tabular}
+\qquad
+\begin{tabular}{l|l}
+Orientation class & Condition\\\hline
+Orientation-preserving & $b>0$\\
+Orientation-reversing (reflection) & $b<0$
+\end{tabular}
+\end{center}
+\end{proposition}
+\begin{proof}
+The classes are defined by the trichotomy of $|b|$ against $1$ and $0$ and by the sign of $b$. The stated effects follow from $|bx|=|b||x|$.
+\end{proof}
+
+\begin{remark}
+The classification is of the \emph{map} $m_b$, not of $b$ alone, and it is a two-coordinate classification. For example, $-3$ is an expansion composed with a reflection, and $-\tfrac12$ is a reduction composed with a reflection. The case $b=1$ is the identity: an isometry that preserves orientation. Nullification is the unique non-invertible case; $m_0$ projects $\R$ onto $\{0\}$ and is the only $m_b$ that loses information. These are statements about $|bx|$, not about $bx$ itself: for $x<0$ and $b>1$ one has $bx<x$ even though $|bx|>|x|$, so ``multiplication by $b>1$ increases $x$'' is true only for $x>0$.
+\end{remark}
+
+\section{The Complex Numbers}\label{sec:complex}
+Write a nonzero $b\in\C$ in polar form $b=re^{i\theta}$ with $r=|b|>0$ and $\theta\in\R/2\pi\mathbb{Z}$.
+
+\begin{theorem}[Polar decomposition in $\C$]\label{thm:complex}
+The map $b\mapsto(e^{i\theta},|b|)$ is a group isomorphism $\C^{\times}\cong S^1\times(0,\infty)$, and $m_b$ is the composition of the scaling by $|b|$ and the rotation of the plane by $\theta=\arg b$, which commute. Multiplication by a real number is the special case $\theta\in\{0,\pi\}$; in particular, \emph{reflection of the real line is rotation of the plane by $\pi$.}
+\end{theorem}
+\begin{proof}
+For $b=re^{i\theta}$ and $c=se^{i\phi}$ we have $bc=rs\,e^{i(\theta+\phi)}$, so the polar coordinates multiply in $(0,\infty)$ and add in $S^1$, giving a homomorphism that is bijective by existence and uniqueness of polar form. Identifying $\C$ with $\R^2$, multiplication by $e^{i\theta}$ is the rotation matrix $\begin{pmatrix}\cos\theta&-\sin\theta\\ \sin\theta&\cos\theta\end{pmatrix}$ and multiplication by $r$ is $rI$, which commute.
+\end{proof}
+
+This changes the interpretation of ``sign reversal'': on the real line the only orientation behaviours available are $\theta=0$ and $\theta=\pi$, and the plane reveals them as the two real members of the circle of rotations. Multiplication by $i$ is neither expansion, reduction nor reflection of the line; it is a quarter turn, and has no real analogue.
+
+\section{Matrices}\label{sec:matrix}
+Let $A\in\R^{n\times n}$ and consider $m_A:x\mapsto Ax$ on $\R^n$. Two standard factorizations (see \cite{horn2013}) give the analogue of Theorems~\ref{thm:real} and~\ref{thm:complex}.
+
+\begin{theorem}[Polar decomposition]\label{thm:polar}
+Every $A\in\R^{n\times n}$ can be written $A=UP$ with $U$ orthogonal and $P=(A^TA)^{1/2}$ symmetric positive semidefinite. $P$ is unique; $U$ is unique if $A$ is invertible. Moreover $UP=PU$ if and only if $A$ is normal ($A^TA=AA^T$).
+\end{theorem}
+
+\begin{theorem}[Singular value decomposition]\label{thm:svd}
+$A=V\Sigma W^T$ with $V,W$ orthogonal and $\Sigma=\operatorname{diag}(\sigma_1\ge\cdots\ge\sigma_n\ge0)$. The $\sigma_i$ are the eigenvalues of $P$, and $\rank A=\#\{i:\sigma_i>0\}$.
+\end{theorem}
+
+Both theorems are standard \cite{horn2013}. Reading them with the classification of Section~\ref{sec:real} gives the following dictionary.
+
+\begin{center}
+\begin{tabular}{p{0.34\textwidth}|p{0.58\textwidth}}
+Real case & Matrix case\\\hline
+Scaling by $|b|>1$ (expansion) & singular values $\sigma_i>1$ stretch directions\\
+Scaling by $0<|b|<1$ (reduction) & singular values $0<\sigma_i<1$ shrink directions\\
+Isometry, $|b|=1$ & $\sigma_i=1$\\
+Nullification, $b=0$ & $\sigma_i=0$: directions are collapsed, $\rank A$ drops\\
+Orientation-preserving, $b>0$ & invertible $A$ with $\det U=+1$ (equivalently $\det A>0$)\\
+Reflection, $b<0$ & invertible $A$ with $\det U=-1$ (equivalently $\det A<0$)
+\end{tabular}
+\end{center}
+
+\noindent Two differences from the scalar case matter.
+\begin{enumerate}
+\item \textbf{Behaviour is directional.} A matrix may expand one direction, reduce another and annihilate a third. The scalar classes of Proposition~\ref{prop:classification} apply direction by direction through the singular values, not to $A$ as a whole.
+\item \textbf{The factors need not commute.} For a scalar, scaling and reflection commute. In Theorem~\ref{thm:polar} they commute exactly when $A$ is normal. This is the first place where the elementary picture ``scale then flip, in either order'' genuinely fails.
+\end{enumerate}
+
+\begin{remark}
+In the sense of Theorem~\ref{thm:polar}, the $1\times1$ real matrices recover Theorem~\ref{thm:real} ($U=\pm1$, $P=|b|$) and the $2\times2$ matrices of the form $\begin{pmatrix}a&-b\\b&a\end{pmatrix}$ recover Theorem~\ref{thm:complex}.
+\end{remark}
+
+\section{Discussion}\label{sec:discussion}
+\subsection{What is and is not claimed}
+The decompositions above are classical. The aim here is to present them as one progression, from $\R$ to $\C$ to matrices, organized around the same four magnitude behaviours and the orientation behaviour. We do not claim a new algebraic structure: each of the ``transformations'' is multiplication by a real number in a particular range, and the usual field axioms already govern their composition. We also make no claims about numerical algorithms, hardware or machine learning; whether the viewpoint offers any benefit there would need separate, evidence-based work.
+
+\subsection{Relation to the study of multiplicative reasoning}
+That repeated addition and scaling fail as complete models of multiplication is well documented in mathematics education research: Fischbein et al.\ \cite{fischbein1985} showed that the implicit ``repeated addition'' model constrains how students handle multipliers below $1$, and Vergnaud \cite{vergnaud1983} treats multiplicative structures as a conceptual field distinct from additive ones. The classification here could be used as a content map for instruction (separating size from orientation, and treating $0$ and $1$ as their own cases), but whether it improves learning is an empirical question this note does not address.
+
+\subsection{Open questions}
+\begin{itemize}
+\item The same split holds for the quaternions, $\mathbb{H}^{\times}\cong S^3\times(0,\infty)$, where the orientation part is a unit quaternion (a rotation of $\R^3$ up to sign) and the factors commute only because positive scalars are central. Which parts of the classification survive for other normed division algebras or for rings with zero divisors, where nullification can occur for nonzero factors?
+\item For matrices, can the failure of $UP=PU$ for non-normal $A$ be quantified in a way that is pedagogically useful (for example, by the commutator norm $\|UP-PU\|$)?
+\item Does an instructional sequence built on Sections~\ref{sec:real}--\ref{sec:matrix} produce measurable differences in student understanding relative to the standard sequence?
+\end{itemize}
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}
