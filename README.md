@@ -1,5 +1,7 @@
 # Multiplication as Reflection, Rotation and Scaling
 
+[![DOI](https://zenodo.org/badge/928180086.svg)](https://doi.org/10.5281/zenodo.24409524)
+
 A decomposition framework from the reals to matrices.
 
 Multiplication by a fixed factor is split into a **magnitude** part (expansion, reduction, isometry, nullification) and an **orientation** part (identity, reflection, rotation). The note proves this for the real numbers (`R* ≅ {±1} × (0,∞)`), the complex numbers (polar form) and matrices (polar decomposition and SVD).
