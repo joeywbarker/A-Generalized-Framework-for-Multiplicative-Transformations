@@ -1,8 +1,8 @@
 cff-version: 1.2.0
 message: "If you use this work, please cite it as below."
-title: "Multiplication as Reflection, Rotation and Scaling: A Decomposition Framework from the Reals to Matrices"
+title: "Size and Direction: A Simple Classification of Multiplication by Any Real Number"
 type: article
-version: "1.1.0"
+version: "2.0.0"
 authors:
   - family-names: Barker
     given-names: Joey Wayne
@@ -10,3 +10,4 @@ date-released: 2026-11-21
 license: CC-BY-4.0
 doi: 10.5281/zenodo.24409524
 repository-code: "https://github.com/joeywbarker/A-Generalized-Framework-for-Multiplicative-Transformations"
+abstract: "Multiplying by a real number changes size by the factor |b| and keeps or flips direction according to its sign. This elementary organization explains the sign rule, inverses, why multiplication by zero cannot be undone, and when multiplying makes a number bigger. Teaching hypotheses are stated as untested. Prepared with AI assistance; not peer reviewed."
