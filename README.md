@@ -8,6 +8,14 @@ Multiplication by a fixed factor is split into a **magnitude** part (expansion, 
 
 The underlying mathematics is classical; the contribution is one consistent classification with complete proofs, aimed at teaching and at relating the elementary and advanced cases.
 
+## Verify
+
+Every numerical claim and worked example in the paper is checked by a script (requires Python 3 and `numpy`):
+
+```
+python3 verify_claims.py
+```
+
 ## Build
 
 ```
