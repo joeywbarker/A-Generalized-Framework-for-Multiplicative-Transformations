@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+title: "Multiplication as Reflection, Rotation and Scaling: A Decomposition Framework from the Reals to Matrices"
+type: article
+authors:
+  - family-names: Barker
+    given-names: Joey Wayne
+date-released: 2026-11-21
+license: CC-BY-4.0
+repository-code: "https://github.com/joeywbarker/A-Generalized-Framework-for-Multiplicative-Transformations"
